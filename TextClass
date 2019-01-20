@@ -1,0 +1,474 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled0.ipynb",
+      "version": "0.3.2",
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/asairam1/ProgrammingAssignment2/blob/master/TextClass\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "metadata": {
+        "id": "OGL3vSnbego4",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "from sklearn import model_selection\n",
+        "from sklearn import preprocessing\n",
+        "from sklearn import linear_model\n",
+        "from sklearn import naive_bayes\n",
+        "from sklearn import metrics\n",
+        "from sklearn import svm\n",
+        "from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer\n",
+        "from sklearn import decomposition, ensemble\n",
+        "\n",
+        "import pandas, numpy, textblob, string\n",
+        "from keras.preprocessing import text, sequence\n",
+        "from keras import layers, models, optimizers"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "metadata": {
+        "id": "cuobvVRAe9u8",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "c291c365-4aad-4220-f43c-a692337ea3e6"
+      },
+      "cell_type": "code",
+      "source": [
+        "data = open('/content/2014_india_floods.csv').read()\n",
+        "labels, texts = [], []\n",
+        "type(data)"
+      ],
+      "execution_count": 57,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "str"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 57
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "id": "06YcPUUanMgE",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "D=pandas.read_csv('/content/2014_india_floods.csv')\n",
+        "D.columns[]"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "metadata": {
+        "id": "0UbfD2x_oKYN",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 166
+        },
+        "outputId": "3aa15e3e-450b-42bc-889d-2b20ff8c3285"
+      },
+      "cell_type": "code",
+      "source": [
+        "#new = old[['A', 'C', 'D']].copy()\n",
+        "Da=D[['choose_one_category','tweet_text']].copy()\n",
+        "Da.describe()"
+      ],
+      "execution_count": 58,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>choose_one_category</th>\n",
+              "      <th>tweet_text</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>count</th>\n",
+              "      <td>2003</td>\n",
+              "      <td>2003</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>unique</th>\n",
+              "      <td>9</td>\n",
+              "      <td>1990</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>top</th>\n",
+              "      <td>injured_or_dead_people</td>\n",
+              "      <td>[News] Kokomo group recognized for rescue duri...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>freq</th>\n",
+              "      <td>959</td>\n",
+              "      <td>2</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "           choose_one_category  \\\n",
+              "count                     2003   \n",
+              "unique                       9   \n",
+              "top     injured_or_dead_people   \n",
+              "freq                       959   \n",
+              "\n",
+              "                                               tweet_text  \n",
+              "count                                                2003  \n",
+              "unique                                               1990  \n",
+              "top     [News] Kokomo group recognized for rescue duri...  \n",
+              "freq                                                    2  "
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 58
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "id": "xZE0FzVLnMtU",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 195
+        },
+        "outputId": "fef190f7-0359-40d7-d290-5bae6a1a1ef2"
+      },
+      "cell_type": "code",
+      "source": [
+        "Da.head()"
+      ],
+      "execution_count": 59,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>choose_one_category</th>\n",
+              "      <th>tweet_text</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>injured_or_dead_people</td>\n",
+              "      <td>RT @timesofindia: Nepal flood toll hits 101, f...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>injured_or_dead_people</td>\n",
+              "      <td>Deadly monsoon hits India, Nepal: Dozens of pe...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>injured_or_dead_people</td>\n",
+              "      <td>Many dead in Nepal and India floods: At least ...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>injured_or_dead_people</td>\n",
+              "      <td>RT @ndtv: Flood fury in North India: dozens ki...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>injured_or_dead_people</td>\n",
+              "      <td>Flood Fury in North India: Dozens Killed, Lakh...</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "      choose_one_category                                         tweet_text\n",
+              "0  injured_or_dead_people  RT @timesofindia: Nepal flood toll hits 101, f...\n",
+              "1  injured_or_dead_people  Deadly monsoon hits India, Nepal: Dozens of pe...\n",
+              "2  injured_or_dead_people  Many dead in Nepal and India floods: At least ...\n",
+              "3  injured_or_dead_people  RT @ndtv: Flood fury in North India: dozens ki...\n",
+              "4  injured_or_dead_people  Flood Fury in North India: Dozens Killed, Lakh..."
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 59
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "id": "rQecYSfSfauk",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "train_x, valid_x, train_y, valid_y = model_selection.train_test_split(Da['tweet_text'], Da['choose_one_category'])"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "metadata": {
+        "id": "mchpEvCIlfgT",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 118
+        },
+        "outputId": "d4e6596c-9e95-4d16-c01c-eacad0737794"
+      },
+      "cell_type": "code",
+      "source": [
+        "train_y.head()"
+      ],
+      "execution_count": 62,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "905     not_related_or_irrelevant\n",
+              "1869    not_related_or_irrelevant\n",
+              "1163       injured_or_dead_people\n",
+              "1984    not_related_or_irrelevant\n",
+              "1536       injured_or_dead_people\n",
+              "Name: choose_one_category, dtype: object"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 62
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "id": "tASkKxTyfklw",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "encoder = preprocessing.LabelEncoder()\n",
+        "train_y = encoder.fit_transform(train_y)\n",
+        "valid_y = encoder.fit_transform(valid_y)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "metadata": {
+        "id": "WZZt5BZQf0r9",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 118
+        },
+        "outputId": "13e72ddf-3005-4ef6-a8c6-2d9977caa574"
+      },
+      "cell_type": "code",
+      "source": [
+        "count_vect = CountVectorizer(analyzer='word', token_pattern=r'\\w{1,}')\n",
+        "count_vect.fit(trainDF['text'])"
+      ],
+      "execution_count": 64,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "CountVectorizer(analyzer='word', binary=False, decode_error='strict',\n",
+              "        dtype=<class 'numpy.int64'>, encoding='utf-8', input='content',\n",
+              "        lowercase=True, max_df=1.0, max_features=None, min_df=1,\n",
+              "        ngram_range=(1, 1), preprocessor=None, stop_words=None,\n",
+              "        strip_accents=None, token_pattern='\\\\w{1,}', tokenizer=None,\n",
+              "        vocabulary=None)"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 64
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "id": "1MCXwDjXf_KR",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "tfidf_vect = TfidfVectorizer(analyzer='word', token_pattern=r'\\w{1,}', max_features=5000)\n",
+        "tfidf_vect.fit(trainDF['text'])\n",
+        "xtrain_tfidf =  tfidf_vect.transform(train_x)\n",
+        "xvalid_tfidf =  tfidf_vect.transform(valid_x)\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "metadata": {
+        "id": "BkjIbbxRhBWz",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "lda_model = decomposition.LatentDirichletAllocation(n_components=20, learning_method='online', max_iter=20)\n",
+        "X_topics = lda_model.fit_transform(xtrain_count)\n",
+        "topic_word = lda_model.components_ \n",
+        "vocab = count_vect.get_feature_names()\n",
+        "vocab"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "metadata": {
+        "id": "K1-rPz-8iIzO",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "n_top_words = 10\n",
+        "topic_summaries = []\n",
+        "for i, topic_dist in enumerate(topic_word):\n",
+        "    topic_words = numpy.array(vocab)[numpy.argsort(topic_dist)][:-(n_top_words+1):-1]\n",
+        "    topic_summaries.append(' '.join(topic_words))"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "metadata": {
+        "id": "JA9sNH8Ci2g1",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "def train_model(classifier, feature_vector_train, label, feature_vector_valid, is_neural_net=False):\n",
+        "    # fit the training dataset on the classifier\n",
+        "    classifier.fit(feature_vector_train, label)\n",
+        "    \n",
+        "    # predict the labels on validation dataset\n",
+        "    predictions = classifier.predict(feature_vector_valid)\n",
+        "    \n",
+        "    if is_neural_net:\n",
+        "        predictions = predictions.argmax(axis=-1)\n",
+        "    \n",
+        "    return metrics.accuracy_score(predictions, valid_y)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "metadata": {
+        "id": "S8IDzNvPi9bL",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "acd0de1f-db3b-4712-82d5-5585d723c10a"
+      },
+      "cell_type": "code",
+      "source": [
+        "accuracy = train_model(naive_bayes.MultinomialNB(), xtrain_tfidf, train_y, xvalid_tfidf)\n",
+        "print (\"NB, WordLevel TF-IDF: \", accuracy)"
+      ],
+      "execution_count": 29,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "NB, WordLevel TF-IDF:  0.8296\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    }
+  ]
+}
